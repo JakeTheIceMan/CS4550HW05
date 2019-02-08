@@ -24,7 +24,7 @@ import game_init from "./starter-game";
 $(() => {
   let root = $('#root')[0];
   if(root) {
-    let channel = socket.channel("games:default", {})
+    let channel = socket.channel("games:" + window.gameName, {})
     game_init(root, channel);
   }
 });

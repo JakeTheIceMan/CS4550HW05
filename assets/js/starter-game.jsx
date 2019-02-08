@@ -25,13 +25,26 @@ class Starter extends React.Component {
   got_view(view) {
     console.log("new view", view);
     this.setState(view.game);
+    if (this.state.flipped) {
+      setTimeout(this.que_flip.bind(this), 1000);
+    }
+  }
+
+  que_flip() {
+    this.channel.push("deflip")
+                .receive("ok", this.de_flip.bind(this));
+  }
+
+  de_flip(view) {
+    console.log("deflip", view);
+    this.setState(view.game);
   }
 
 //n
   on_flip(ev) { 
-    if (_ev.target.id <= 15 && _ev.target.id >= 0) {
+    if (ev.target.id <= 15 && ev.target.id >= 0) {
       this.channel.push("flip", { tileNum: ev.target.id })
-                  .recieve("ok", this.got_view.bind(this));
+                  .receive("ok", this.got_view.bind(this));
     }
   }
 
@@ -45,7 +58,7 @@ class Starter extends React.Component {
 //n
   restart() {
     this.channel.push("restart")
-                .recieve("ok", this.got_view.bind(this));
+                .receive("ok", this.got_view.bind(this));
   }
 
 //r

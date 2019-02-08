@@ -17,6 +17,7 @@ defmodule Memory.Game do
       t1: -1,
       t2: -1,
       clicks: 0,
+      flipped: false,
     }
   end
 
@@ -30,59 +31,52 @@ defmodule Memory.Game do
                                     end
                                   end),
       clicks: game.clicks,
+      flipped: game.flipped,
     }
   end
 
-#  checkMatch() {
-#    var n1 = this.state.t1;
-#    var n2 = this.state.t2;
-#    if(this.state.tiles[n1].value === this.state.tiles[n2].value) {
-#      let myTiles = this.state.tiles.map((tile, i) => {
-#        if (i == n1 || i == n2) {
-#          return {...myTiles, matched: true};
-#        }
-#        else {
-#          return tile;
-#        }});
-#      this.setState({tiles: myTiles});
-#    }
-#    this.setState({t1: -1, t2: -1});
-#  }
-
   def checkMatches(game) do
-#    if (tiles |> Enum.get(game.t1).value == tiles |> Enum.get(game.t2).value) do    
-#      game = %{ game | tiles: List.replace_at(game.tiles, 
-      
-    game      
-#    end
+    if (Enum.at(game.tiles, game.t1).value != Enum.at(game.tiles, game.t2).value) do
+      game = %{ game | tiles: List.replace_at(game.tiles, game.t1, %{Enum.at(game.tiles, game.t1) | matched: false})}
+      game = %{ game | tiles: List.replace_at(game.tiles, game.t2, %{Enum.at(game.tiles, game.t2) | matched: false})}
+      game = %{game | flipped: false}
+      game = %{game | t1: -1}
+      game = %{game | t2: -1}
+    else
+      game = %{game | flipped: false}
+      game = %{game | t1: -1}
+      game = %{game | t2: -1}
+    end
   end
 
-#  flip(_ev) {
-#    if (_ev.target.id <= 15 && _ev.target.id >= 0) {
-#      if (~this.state.tiles[_ev.target.id].matched) {
-#        if (this.state.t1 == -1) {
-#          this.setState({clicks: this.state.clicks + 1, t1: _ev.target.id});
-#        }
-#        else if (this.state.t2 == -1 && _ev.target.id != this.state.t1) {
-#          this.setState({clicks: this.state.clicks + 1, t2: _ev.target.id});
-#          setTimeout(this.checkMatch.bind(this), 1000);
-#        }
-#      }
-#    }
-#  }
+  def deflip(game) do
+    checkMatches(game)
+  end
 
   def flip(game, tileNum) do
-    if !(game.tiles |> Enum.at(tileNum).matched) do
-      if (game.t1 == -1) do
-        game = %{game | t1: tileNum}
-        game = %{game | clicks: game.clicks + 1}
-      else 
-        if (game.t2 == -1 && tileNum != game.t2) do
-          game = %{game | t2: tileNum};
+    IO.puts tileNum
+    tileNum = Integer.parse(tileNum) |> elem(0)
+    if (Enum.at(game.tiles, tileNum).matched == false) do
+      if (tileNum != game.t1 && tileNum != game.t2) do
+        if (game.t1 == -1) do
+          game = %{game | t1: tileNum}
           game = %{game | clicks: game.clicks + 1}
-          checkMatches(game)
+          game = %{ game | tiles: List.replace_at(game.tiles, game.t1, %{Enum.at(game.tiles, game.t1) | matched: true})}
+        else 
+          if (game.t2 == -1) do
+            game = %{game | t2: tileNum};
+            game = %{game | flipped: true}
+            game = %{game | clicks: game.clicks + 1}
+            game = %{ game | tiles: List.replace_at(game.tiles, game.t2, %{Enum.at(game.tiles, game.t2) | matched: true})}
+          else
+            game
+          end
         end
+      else
+        game
       end
+    else 
+      game
     end
   end
 
